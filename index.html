@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Trace Reaper is an autonomous side-channel analysis agent that surveys traces, runs CPA, verifies candidates, and writes a field report."
+    />
+    <meta name="theme-color" content="#0a0d0a" />
+    <title>Trace Reaper — Hunt the leak.</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,400..800&family=DM+Mono:wght@300;400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="noise" aria-hidden="true"></div>
+    <header class="topbar">
+      <a class="brand" href="#top" aria-label="Trace Reaper home">
+        <span class="brand-mark">TR</span>
+        <span>TRACE<span class="brand-slash">//</span>REAPER</span>
+      </a>
+      <div class="topbar-meta">
+        <span class="live-dot" aria-hidden="true"></span>
+        <span id="engine-status">AGENT IDLE</span>
+        <span class="meta-divider">/</span>
+        <span>LOCAL ENGINE</span>
+        <a class="repo-link" href="https://github.com/wenquan222/trace-reaper" target="_blank" rel="noreferrer">REPO ↗</a>
+      </div>
+    </header>
+
+    <main id="top">
+      <section class="hero">
+        <div class="hero-copy">
+          <p class="eyebrow reveal">KIROWEEN 2026 <span>·</span> FRANKENSTEIN</p>
+          <h1 class="reveal">HUNT THE<br /><em>LEAK.</em></h1>
+          <p class="hero-lede reveal">
+            An autonomous side-channel analyst that surveys noisy traces, runs
+            correlation power analysis, verifies every candidate, and leaves a
+            field report behind.
+          </p>
+          <div class="hero-actions reveal">
+            <button id="run-agent-hero" class="button button-primary" type="button">
+              Run the agent <span aria-hidden="true">↗</span>
+            </button>
+            <button id="reset-sample-hero" class="button button-ghost" type="button">
+              Reset sample
+            </button>
+          </div>
+        </div>
+        <div class="hero-orbit reveal" aria-hidden="true">
+          <div class="orbit-ring orbit-ring-a"></div>
+          <div class="orbit-ring orbit-ring-b"></div>
+          <div class="orbit-core">
+            <span>16</span>
+            <small>KEY BYTES</small>
+          </div>
+          <div class="orbit-tag orbit-tag-a">SURVEY</div>
+          <div class="orbit-tag orbit-tag-b">SCAN</div>
+          <div class="orbit-tag orbit-tag-c">VERIFY</div>
+        </div>
+      </section>
+
+      <section class="workspace" aria-label="Trace analysis workspace">
+        <aside class="control-panel panel">
+          <div class="panel-head">
+            <span>INPUT DECK</span>
+            <span>01</span>
+          </div>
+
+          <div class="field">
+            <div class="field-label">
+              <label for="trace-count">TRACE COUNT</label>
+              <output id="trace-count-output" for="trace-count">180</output>
+            </div>
+            <input id="trace-count" type="range" min="80" max="320" step="20" value="180" />
+            <div class="range-scale"><span>80</span><span>320</span></div>
+          </div>
+
+          <div class="field">
+            <div class="field-label">
+              <label for="noise-level">NOISE LEVEL</label>
+              <output id="noise-output" for="noise-level">0.85</output>
+            </div>
+            <input id="noise-level" type="range" min="0.2" max="2" step="0.05" value="0.85" />
+            <div class="range-scale"><span>LOW</span><span>HIGH</span></div>
+          </div>
+
+          <div class="field">
+            <label for="leakage-model">LEAKAGE MODEL</label>
+            <select id="leakage-model">
+              <option value="hamming">S-box output · Hamming weight</option>
+              <option value="raw">S-box output · raw value</option>
+            </select>
+          </div>
+
+          <div class="dropzone" id="dropzone">
+            <input id="trace-file" type="file" accept=".csv,.txt" />
+            <span class="drop-icon" aria-hidden="true">⌁</span>
+            <strong>Drop a trace CSV</strong>
+            <small>or click to choose · plaintext_hex + sample columns</small>
+          </div>
+
+          <button id="run-agent" class="button button-primary button-wide" type="button">
+            Run analysis <span aria-hidden="true">→</span>
+          </button>
+          <p class="microcopy">
+            Analysis runs in a Web Worker. Trace data stays in this browser tab.
+          </p>
+        </aside>
+
+        <div class="dashboard">
+          <div class="metric-row">
+            <article class="metric">
+              <span>TRACES</span>
+              <strong id="metric-traces">180</strong>
+              <small>captured</small>
+            </article>
+            <article class="metric">
+              <span>SAMPLES</span>
+              <strong id="metric-samples">420</strong>
+              <small>per trace</small>
+            </article>
+            <article class="metric">
+              <span>NOISE σ</span>
+              <strong id="metric-noise">0.85</strong>
+              <small>synthetic</small>
+            </article>
+            <article class="metric metric-accent">
+              <span>STATE</span>
+              <strong id="metric-state">READY</strong>
+              <small id="metric-state-note">sample loaded</small>
+            </article>
+          </div>
+
+          <section class="panel plot-panel">
+            <div class="panel-head">
+              <span>LEAKAGE MAP</span>
+              <span id="plot-state">STANDBY</span>
+            </div>
+            <div class="plot-wrap">
+              <canvas id="trace-canvas" aria-label="Trace leakage plot"></canvas>
+              <div class="scan-line" id="scan-line" aria-hidden="true"></div>
+            </div>
+            <div class="plot-legend">
+              <span><i class="legend-line"></i> mean trace</span>
+              <span><i class="legend-band"></i> trace envelope</span>
+              <span><i class="legend-peak"></i> candidate peak</span>
+            </div>
+          </section>
+
+          <section class="panel key-panel">
+            <div class="panel-head">
+              <span>RECOVERED KEY</span>
+              <span id="key-status">AWAITING RUN</span>
+            </div>
+            <div id="key-grid" class="key-grid" aria-label="Recovered key bytes"></div>
+            <div class="key-footer">
+              <span id="key-hex">--</span>
+              <span id="key-match">GROUND TRUTH LOCKED</span>
+            </div>
+          </section>
+
+          <section class="panel log-panel">
+            <div class="panel-head">
+              <span>AGENT TRACE</span>
+              <span id="log-count">0 EVENTS</span>
+            </div>
+            <ol id="agent-log" class="agent-log" aria-live="polite"></ol>
+          </section>
+
+          <section class="panel report-panel">
+            <div class="panel-head">
+              <span>FIELD REPORT</span>
+              <span>EXPORT</span>
+            </div>
+            <div class="report-grid">
+              <div>
+                <span>CONFIDENCE</span>
+                <strong id="confidence">--</strong>
+              </div>
+              <div>
+                <span>BEST BYTE</span>
+                <strong id="best-byte">--</strong>
+              </div>
+              <div>
+                <span>TOP MARGIN</span>
+                <strong id="top-margin">--</strong>
+              </div>
+              <div>
+                <span>RUNTIME</span>
+                <strong id="runtime">--</strong>
+              </div>
+            </div>
+            <div class="report-actions">
+              <button id="download-report" class="button button-ghost" type="button" disabled>
+                Download report
+              </button>
+              <span id="report-note">Run the agent to unlock the report.</span>
+            </div>
+          </section>
+        </div>
+      </section>
+
+      <section class="how" aria-label="How the agent works">
+        <div class="how-intro">
+          <p class="eyebrow">THE LOOP</p>
+          <h2>One agent.<br />Four moves.</h2>
+        </div>
+        <div class="how-steps">
+          <article>
+            <span>01</span>
+            <h3>Survey</h3>
+            <p>Measure the trace envelope, estimate signal quality, and pick the search window.</p>
+          </article>
+          <article>
+            <span>02</span>
+            <h3>Scan</h3>
+            <p>Test every key hypothesis for every byte with correlation power analysis.</p>
+          </article>
+          <article>
+            <span>03</span>
+            <h3>Verify</h3>
+            <p>Rank candidates by peak correlation and separation from the runner-up.</p>
+          </article>
+          <article>
+            <span>04</span>
+            <h3>Report</h3>
+            <p>Write a reproducible field note with key bytes, confidence, and runtime.</p>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <span>TRACE//REAPER · BUILT FOR KIROWEEN 2026</span>
+      <span>NO TRACE DATA LEAVES THE BROWSER</span>
+    </footer>
+
+    <script src="app.js" type="module"></script>
+  </body>
+</html>

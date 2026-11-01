@@ -1,0 +1,12 @@
+{
+  "name": "trace-reaper",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Autonomous side-channel analysis agent for Kiroween 2026",
+  "type": "module",
+  "scripts": {
+    "test": "node tests/smoke.mjs",
+    "serve": "python serve.py 8080"
+  },
+  "license": "MIT"
+}

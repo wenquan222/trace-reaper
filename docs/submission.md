@@ -80,7 +80,7 @@ The useful unit in side-channel work is not just the final key. It is the eviden
 
 ## Links
 
-- Demo: `{{APP_URL}}`
+- Demo: `https://haillife.top/trace-reaper/`
 - Repository: `https://github.com/wenquan222/trace-reaper`
 - Video: `{{YOUTUBE_URL}}`
 - Blog: `{{BLOG_URL}}`

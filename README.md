@@ -6,6 +6,10 @@ Trace Reaper is a browser-native demo for Kiroween 2026. It turns a pile of powe
 
 The demo is intentionally self-contained. It ships with a synthetic AES-128 dataset, runs correlation power analysis in a Web Worker, and keeps trace data inside the browser tab.
 
+## Live demo
+
+**https://haillife.top/trace-reaper/**
+
 ## Run locally
 
 No build step is required.
